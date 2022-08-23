@@ -13,7 +13,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: LoadingScreen(),
+      debugShowCheckedModeBanner: false,
+      home: CalculatorScreen(),
     );
   }
 }
@@ -31,7 +32,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // TODO: implement initState
     super.initState();
     Timer(
-      Duration(seconds: 5),
+      Duration(seconds: 2),
         ()=>{
         Navigator.of(context).pop(),
         Navigator.push(
@@ -57,9 +58,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   shape: BoxShape.circle
                 )
             );
-
           },
-
         ),
       ),
     );
