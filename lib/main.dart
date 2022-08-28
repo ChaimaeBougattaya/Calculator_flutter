@@ -14,7 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: CalculatorScreen(),
+      home: LoadingScreen(),
     );
   }
 }
@@ -32,7 +32,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
     // TODO: implement initState
     super.initState();
     Timer(
-      Duration(seconds: 2),
+      Duration(seconds: 3),
         ()=>{
         Navigator.of(context).pop(),
         Navigator.push(
@@ -45,12 +45,12 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.deepPurple[100],
       body: Center(
         child: SpinKitCircle(
-          size: 90,
+          size: 140,
           itemBuilder: (context,index) {
-            final colors = [Colors.blue.shade600,Colors.pink,Colors.yellow];
+            final colors = [Colors.purple,Colors.pink,Colors.deepPurple,Colors.white,Colors.deepPurpleAccent];
             final color= colors[ index % colors.length ];
             return DecoratedBox(
                 decoration: BoxDecoration(

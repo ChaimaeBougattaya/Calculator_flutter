@@ -1,6 +1,7 @@
 import 'package:calculator_app/Widgets/Buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({Key? key}) : super(key: key);
@@ -10,13 +11,13 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  var question = "";
-  var answer = "";
+  var equation = "";
+  var result = "";
   final List<String> buttons = [
     "C",
-    "DEL",
+    "⌫",
     "%",
-    "/",
+    "÷",
     "9",
     "8",
     "7",
@@ -46,15 +47,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                SizedBox(height: 50,),
+                const SizedBox(
+                  height: 50,
+                ),
                 Container(
-                    padding  : EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     alignment: Alignment.centerLeft,
-                    child: Text(question,style: const TextStyle(fontSize: 20),)),
+                    child: Text(
+                      equation,
+                      style:
+                          const TextStyle(fontSize: 40, color: Colors.purple),
+                    )),
                 Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     alignment: Alignment.centerRight,
-                    child: Text(answer,style: const TextStyle(fontSize: 20),))
+                    child: Text(
+                      result,
+                      style: const TextStyle(
+                          fontSize: 30, color: Colors.purpleAccent),
+                    ))
               ],
             ),
           )),
@@ -63,64 +74,111 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: Container(
                 child: GridView.builder(
                     itemCount: buttons.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4),
                     itemBuilder: (BuildContext context, int index) {
                       return MyButton(
-                        isTapped: () {
+                        Tapped: () {
                           setState(() {
-                            if(index==0){
-                              question="";
-                              answer="";
-                            }else if(index==1){
-                              if(!question.isEmpty){
-                                question=question.substring(0,question.length-1);
-                              }
-                            }
-                            else{
-                              if(question.isEmpty){
-                                if(this.isNumber(buttons[index])){
-                                  question+=buttons[index];
-                                  //answer=buttons[index];
+                            switch (index) {
+                              case 0:
+                                {
+                                  equation = "";
+                                  result = "";
                                 }
-                                else
-                                  {
-                                    Fluttertoast.showToast(
-                                        msg: "invalid format used",
-                                        backgroundColor: Colors.black87,
-                                        fontSize: 16.0
-                                    );
+                                break;
+                              case 1:
+                                {
+                                  if (equation.isNotEmpty) {
+                                    equation = equation.substring(
+                                        0, equation.length - 1);
+                                    if (equation.isEmpty ||
+                                        end_with_operator(equation)) {
+                                      result = "";
+                                    } else {
+                                      evaluate_expression();
+                                    }
                                   }
-                              }else{
-                                if(this.end_with_operator(question)){
-                                  if(this.isOperator(buttons[index])) {
-                                    Fluttertoast.showToast(
-                                        msg: "invalid format used",
-                                        backgroundColor: Colors.black87,
-                                        fontSize: 16.0
-                                    );
-                                  } else
-                                    question+=buttons[index];
-                                }else{
-                                  question+=buttons[index];
                                 }
-                              }
+                                break;
+                              case 18:
+                                {
+                                  //ANS
+                                }
+                                break;
+                              case 19:
+                                {
+                                  // =
+                                  equation = result;
+                                  result = "";
+                                }
+                                break;
+                              default:
+                                {
+                                  switch (equation) {
+                                    case "":
+                                      {
+                                        //first tap
+                                        if (isNumber(buttons[index])) {
+                                          equation += buttons[index];
+                                        } else {
+                                          Fluttertoast.showToast(
+                                              msg: "invalid format used",
+                                              backgroundColor: Colors.black87,
+                                              fontSize: 16.0);
+                                        }
+                                      }
+                                      break;
+                                    default:
+                                      {
+                                        if (end_with_operator(equation)) {
+                                          if (isOperator(buttons[index])) {
+                                            Fluttertoast.showToast(
+                                                msg: "invalid format used",
+                                                backgroundColor: Colors.black87,
+                                                fontSize: 16.0);
+                                          } else {
+                                            equation += buttons[index];
+                                            evaluate_expression();
+                                          }
+                                        } else {
+                                          equation += buttons[index];
+                                          if (!end_with_operator(equation)) {
+                                            evaluate_expression();
+                                          }else {
+                                            result = "";
+                                          }
+                                        }
+                                      }
+                                      break;
+                                  }
+                                }
+                                break;
                             }
                           });
                         },
-                        colorbutton: isOperator(buttons[index])
-                            ? Colors.deepPurple
-                            : isDelete(buttons[index])
-                                ? Colors.green
-                                : isClear(buttons[index])
-                                    ? Colors.red
-                                    : Colors.deepPurple[50],
+                        colorbutton: isequal(buttons[index])
+                            ? Colors.purple
+                            : Colors.deepPurple[50],
                         colortext: isOperator(buttons[index]) ||
                                 isDelete(buttons[index]) ||
-                                isClear(buttons[index])
-                            ? Colors.white
-                            : Colors.deepPurple,
+                                isANS(buttons[index])
+                            ? Colors.purple
+                            : isequal(buttons[index])
+                                ? Colors.white
+                                : isClear(buttons[index])
+                                    ? Colors.pink
+                                    : Colors.black,
                         textbutton: buttons[index],
+                        size: isClear(buttons[index]) ||
+                                isDelete(buttons[index]) ||
+                                isANS(buttons[index])
+                            ? 28
+                            : isOperator(buttons[index]) ||
+                                    isequal(buttons[index])
+                                ? 34
+                                : 30,
                       );
                     }),
               ))
@@ -130,12 +188,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   bool isOperator(String str) {
-    return (str == "%" ||
-        str == "×" ||
-        str == "-" ||
-        str == "+" ||
-        str == "/" ||
-        str == "=");
+    return (str == "%" || str == "×" || str == "-" || str == "+" || str == "÷");
   }
 
   bool isNumber(String str) {
@@ -152,14 +205,40 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 
   bool isDelete(String str) {
-    return str == "DEL";
+    return str == "⌫";
   }
 
   bool isClear(String str) {
     return str == "C";
   }
-  bool end_with_operator(String str){
-    return str.endsWith("%") || str.endsWith("×") || str.endsWith("-") ||
-        str.endsWith("+") ||str.endsWith("/");
+
+  bool end_with_operator(String str) {
+    return str.endsWith("%") ||
+        str.endsWith("×") ||
+        str.endsWith("-") ||
+        str.endsWith("+") ||
+        str.endsWith("÷");
+  }
+
+  evaluate_expression() {
+    if (equation.isNotEmpty) {
+      Parser p = Parser();
+      String question = equation.replaceAll("×", "*");
+      question = question.replaceAll('÷', '/');
+      Expression exp = p.parse(question);
+      ContextModel cm = ContextModel();
+      double eval = exp.evaluate(EvaluationType.REAL, cm);
+      result = eval.toString();
+    } else {
+      result = "";
+    }
+  }
+
+  bool isequal(String str) {
+    return str == "=";
+  }
+
+  bool isANS(String str) {
+    return str == "ANS";
   }
 }
