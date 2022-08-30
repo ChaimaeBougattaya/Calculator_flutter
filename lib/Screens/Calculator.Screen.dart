@@ -219,15 +219,21 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         str.endsWith("+") ||
         str.endsWith("÷");
   }
+  bool contains_point(String str){
+    return str.contains(".");
+  }
 
   evaluate_expression() {
     if (equation.isNotEmpty) {
       Parser p = Parser();
       String question = equation.replaceAll("×", "*");
       question = question.replaceAll('÷', '/');
+      print('question : $question');
       Expression exp = p.parse(question);
+      print('expression : $exp');
       ContextModel cm = ContextModel();
       double eval = exp.evaluate(EvaluationType.REAL, cm);
+      print('\nEvaluated expression: $eval'); // = 1
       result = eval.toString();
     } else {
       result = "";
